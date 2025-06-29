@@ -5,7 +5,7 @@
 
 /* ---------- Traducciones ---------- */
 const i18n={
-  es:{newTab:"Nueva pestaña",reset:"Reset / Nuevo evento",createEvent:"Crear Parranda / Torneo (Dobles)",create:"Crear",playerReg:"Registro de jugadores",genCalendar:"Generar calendario",ranking:"Ranking"},
+  es:{newTab:"Nueva pestaña",reset:"Reset / Nuevo evento",createEvent:"Crear Partida / Torneo",create:"Crear",playerReg:"Registro de jugadores",genCalendar:"Generar calendario",ranking:"Ranking"},
   en:{newTab:"New tab",reset:"Reset / New event",createEvent:"Create Match / Tournament (Doubles)",create:"Create",playerReg:"Player registration",genCalendar:"Generate schedule",ranking:"Leaderboard"}
 };
 let lang="es";
