@@ -146,20 +146,29 @@ const PadelMatchApp = {
     this.saveAndRender();
   },
   
-  recordResult(inputElement) {
+ recordResult(inputElement) {
     const li = inputElement.closest('.match-list__item');
     const key = li.dataset.key;
     const inputs = li.querySelectorAll('.score-input');
-    const gA = parseInt(inputs[0].value, 10);
-    const gB = parseInt(inputs[1].value, 10);
+    const gA_val = inputs[0].value;
+    const gB_val = inputs[1].value;
 
-    if (isNaN(gA) || isNaN(gB)) {
-        // Si uno de los inputs se vacía, eliminamos el resultado
-        delete this.state.resultados[key];
+    // Convierte a número, o lo deja como string vacío si no es un número válido
+    const gA = !isNaN(parseInt(gA_val, 10)) ? parseInt(gA_val, 10) : "";
+    const gB = !isNaN(parseInt(gB_val, 10)) ? parseInt(gB_val, 10) : "";
+
+    // Si ambos campos están vacíos, eliminamos el registro del partido
+    if (gA === "" && gB === "") {
+      delete this.state.resultados[key];
     } else {
-        this.state.resultados[key] = { gA, gB };
+      this.state.resultados[key] = { gA, gB };
     }
-    this.saveAndRender();
+
+    // *** LA CLAVE DEL ARREGLO ESTÁ AQUÍ ***
+    // Ya no llamamos a render() completo, solo guardamos el estado y actualizamos el ranking.
+    // Esto evita que los campos de texto se borren.
+    this.saveState();
+    this.updateRanking();
   },
 
   // =================================================================
@@ -226,19 +235,36 @@ const PadelMatchApp = {
     this.state.jugadores.forEach((j) => (stats[j] = { vict: 0, games: 0 }));
 
     Object.entries(this.state.resultados).forEach(([k, { gA, gB }]) => {
-      const [a1, a2, b1, b2] = this.decodeKey(k);
-      if (gA > gB) {
-        stats[a1].vict++;
-        stats[a2].vict++;
-      } else if (gB > gA) {
-        stats[b1].vict++;
-        stats[b2].vict++;
+      // *** MEJORA DE ROBUSTEZ AÑADIDA AQUÍ ***
+      // Solo calcula el resultado si AMBOS marcadores son números.
+      if (typeof gA === 'number' && typeof gB === 'number') {
+        const [a1, a2, b1, b2] = this.decodeKey(k);
+        if (gA > gB) {
+          stats[a1].vict++;
+          stats[a2].vict++;
+        } else if (gB > gA) {
+          stats[b1].vict++;
+          stats[b2].vict++;
+        }
+        stats[a1].games += gA;
+        stats[a2].games += gA;
+        stats[b1].games += gB;
+        stats[b2].games += gB;
       }
-      stats[a1].games += gA;
-      stats[a2].games += gA;
-      stats[b1].games += gB;
-      stats[b2].games += gB;
     });
+
+    const order = Object.entries(stats).sort(
+      (a, b) => b[1].vict - a[1].vict || b[1].games - a[1].games
+    );
+
+    let html = `<thead><tr><th>#</th><th>${this.t("playerReg")}</th><th>V</th><th>G</th></tr></thead><tbody>`;
+    order.forEach(
+      ([j, s], i) =>
+        (html += `<tr><td>${i + 1}</td><td>${j}</td><td>${s.vict}</td><td>${s.games}</td></tr>`)
+    );
+    html += `</tbody>`;
+    this.elements.tablaRanking.innerHTML = html;
+  },
 
     const order = Object.entries(stats).sort(
       (a, b) => b[1].vict - a[1].vict || b[1].games - a[1].games
