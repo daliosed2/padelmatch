@@ -88,19 +88,41 @@ function generarRondas(){
 const genPartidos=p=>[[p[0],p[1],p[2],p[3]],[p[0],p[2],p[1],p[3]],[p[0],p[3],p[1],p[2]]]; // 3 únicos
 
 /* ---------- Pintar rondas ---------- */
-function pintarRondas(){
-  const cont=$("rondasContainer");cont.innerHTML="";
-  rondas.forEach((matches,r)=>{
-    cont.appendChild(document.createElement("h3")).textContent=`${t("ranking")} R${r+1}`;
-    const ul=document.createElement("ul");ul.id=`ulR${r}`;cont.appendChild(ul);
-    matches.forEach((m,i)=>{
-      const key=encodeKey(m);const li=document.createElement("li");ul.appendChild(li);
-      li.innerHTML=`
-        ${m[0]} & ${m[1]} vs ${m[2]} & ${m[3]}
-        <input type="number" min="0" placeholder="Games ${m[0]}-${m[1]}" value="${resultados[key]?.gA||""}">
-        <input type="number" min="0" placeholder="Games ${m[2]}-${m[3]}" value="${resultados[key]?.gB||""}">
+/* ---------- Pintar rondas (inputs con clase score-input) ---------- */
+function pintarRondas() {
+  const cont = $("rondasContainer");
+  cont.innerHTML = "";
+
+  rondas.forEach((matches, idxR) => {
+    /* título de la ronda */
+    const h3 = document.createElement("h3");
+    h3.textContent = `${t("ranking")} R${idxR + 1}`;
+    cont.appendChild(h3);
+
+    const ul = document.createElement("ul");
+    ul.id = `ulR${idxR}`;
+    cont.appendChild(ul);
+
+    /* cada partido de la ronda */
+    matches.forEach((m, idxM) => {
+      const key = encodeKey(m);
+      const li  = document.createElement("li");
+      ul.appendChild(li);
+
+      li.innerHTML = `
+        ${m[0]} & ${m[1]} <strong>vs</strong> ${m[2]} & ${m[3]}
+        <input type="number" class="score-input" min="0"
+               placeholder="Games ${m[0]}-${m[1]}"
+               value="${resultados[key]?.gA ?? ""}">
+        <input type="number" class="score-input" min="0"
+               placeholder="Games ${m[2]}-${m[3]}"
+               value="${resultados[key]?.gB ?? ""}">
       `;
-      li.querySelectorAll("input").forEach(inp=>inp.onchange=()=>registrar(key,li));
+
+      /* registrar resultado al cambiar cualquier input */
+      li.querySelectorAll("input").forEach(inp =>
+        inp.onchange = () => registrar(key, li)
+      );
     });
   });
 }
