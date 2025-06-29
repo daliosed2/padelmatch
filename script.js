@@ -15,7 +15,7 @@ const i18n = {
   es: {
     newTab: "Nueva pestaña",
     reset: "Reset / Nuevo evento",
-    createEvent: "Crear Parranda / Torneo (Dobles)",
+    createEvent: "Crear partida / Torneo",
     create: "Crear",
     playerReg: "Registro de jugadores",
     genCalendar: "Generar calendario",
