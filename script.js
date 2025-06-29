@@ -1,177 +1,147 @@
 /*****************************************************************
- *  PadelMatch – dobles 2 vs 2
- *  - Ronda única con TODAS las combinaciones de parejas (n = 4 → 3 partidos)
- *  - Puntaje por partido y ranking individual
- *  - Reset y pestañas independientes (sessionStorage)
+ *  PadelMatch –  UX mejorado:
+ *  - Modo oscuro automático (CSS) +
+ *  - Traducción ES / EN con botón
+ *  - Iconos Lucide en botones
+ *  - Animación fade-in (CSS) al añadir jugadores/resultados
  *****************************************************************/
 
-/* ---------- Variables ---------- */
-let jugadores    = [];                 // lista de nombres
-let eventoNombre = "";
-let rondas       = [];                 // [ [ [a1,a2,b1,b2], ... ] ]  (una lista por ronda)
-let resultados   = {};                 // { key: {gA,gB} }
-
-const $ = id => document.getElementById(id);
-
-/* ---------- Helpers de clave ---------- */
-const encodeKey = ([a1,a2,b1,b2]) => `${a1}&${a2}|${b1}&${b2}`;
-const decodeKey = key => {
-  const [tA, tB] = key.split("|");
-  return [...tA.split("&"), ...tB.split("&")];
+/* ---------- Traducciones ---------- */
+const i18n = {
+  es:{
+    newTab:"Nueva pestaña", reset:"Reset / Nuevo evento", createEvent:"Crear Parranda / Torneo (Dobles)",
+    create:"Crear", playerReg:"Registro de jugadores", genCalendar:"Generar calendario",
+    ranking:"Ranking"
+  },
+  en:{
+    newTab:"New tab", reset:"Reset / New event", createEvent:"Create Match / Tournament (Doubles)",
+    create:"Create", playerReg:"Player registration", genCalendar:"Generate schedule",
+    ranking:"Leaderboard"
+  }
 };
+let lang="es";
+
+/* ---------- Variables de torneo ---------- */
+let jugadores=[], eventoNombre="", rondas=[], resultados={};
+
+const $=id=>document.getElementById(id);
+const encodeKey=([a1,a2,b1,b2])=>`${a1}&${a2}|${b1}&${b2}`;
+const decodeKey=k=>{const[tA,tB]=k.split("|");return[...tA.split("&"),...tB.split("&")];};
 
 /* ---------- Persistencia ---------- */
-function guardar() {
-  sessionStorage.setItem("padelmatch",
-    JSON.stringify({ eventoNombre, jugadores, rondas, resultados })
-  );
+function save(){
+  sessionStorage.setItem("padelmatch",JSON.stringify({eventoNombre,jugadores,rondas,resultados,lang}));
 }
-function cargar() {
-  const d = JSON.parse(sessionStorage.getItem("padelmatch"));
-  if (!d) return;
-  ({ eventoNombre, jugadores, rondas, resultados } = d);
+function load(){
+  const d=JSON.parse(sessionStorage.getItem("padelmatch")); if(!d)return;
+  ({eventoNombre,jugadores,rondas,resultados,lang}=d);
 }
+
+/* ---------- UI helpers ---------- */
+const t=(k)=>i18n[lang][k]||k;
+function applyTranslations(){
+  document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
+  $("langTxt").textContent=lang==="es"?"EN":"ES";
+}
+function initLucide(){ lucide.createIcons(); }   // tras pintar HTML dinámico
 
 /* ---------- Botones globales ---------- */
-function abrirNuevaPestana() { window.open(location.href, "_blank"); }
-function resetEvento() {
-  if (confirm("¿Borrar todos los datos y comenzar de nuevo?")) {
-    sessionStorage.clear();
-    location.reload();
-  }
-}
+$("btnNueva").onclick=()=>window.open(location.href,"_blank");
+$("btnReset").onclick=()=>{ if(confirm("¿Reset?")){sessionStorage.clear();location.reload();} };
+$("langBtn").onclick=()=>{
+  lang=lang==="es"?"en":"es";
+  applyTranslations(); save();
+};
 
 /* ---------- Crear evento ---------- */
-function crearEvento() {
-  const n = $("nombreEvento").value.trim();
-  if (!n) return alert("Pon un nombre al evento");
-  eventoNombre = n;
-  $("nombreEventoActual").textContent = `Evento: ${eventoNombre}`;
-  $("crear-evento").style.display  = "none";
-  $("registro-jugadores").style.display = "block";
-  guardar();
+$("crearBtn").onclick=crearEvento;
+function crearEvento(){
+  const n=$("nombreEvento").value.trim();
+  if(!n)return alert("Nombre?");
+  eventoNombre=n;
+  $("nombreEventoActual").textContent=`${t("createEvent")}: ${eventoNombre}`;
+  $("crear-evento").style.display="none";
+  $("registro-jugadores").style.display="block";
+  save(); initLucide();
 }
 
-/* ---------- Gestión de jugadores ---------- */
-function agregarJugador() {
-  const n = $("nombreJugador").value.trim();
-  if (!n) return alert("Nombre vacío");
-  if (jugadores.includes(n)) return alert("Ese jugador ya está");
-  jugadores.push(n);
-  $("nombreJugador").value = "";
-  pintarJugadores();
-  guardar();
+/* ---------- Jugadores ---------- */
+$("addPlayerBtn").onclick=agregarJugador;
+function agregarJugador(){
+  const n=$("nombreJugador").value.trim();
+  if(!n)return;
+  if(jugadores.includes(n))return alert("Ya existe");
+  jugadores.push(n); $("nombreJugador").value="";
+  pintarJugadores(); save(); initLucide();
 }
-function pintarJugadores() {
-  $("listaJugadores").innerHTML = jugadores
-    .map((j, i) => `<li>${i + 1}. ${j}</li>`).join("");
-}
-
-/* ---------- Generar rondas con TODAS las combinaciones (n = 4) ---------- */
-function generarRondas() {
-  const nR = +$("numRondas").value;
-  if (nR < 1) return alert("Indica un nº de rondas (≥1)");
-  if (jugadores.length !== 4) return alert("Esta versión necesita exactamente 4 jugadores");
-
-  rondas = [];
-  for (let r = 0; r < nR; r++) {
-    rondas.push(generarTodosLosPartidos(jugadores));
-  }
-  resultados = {};
-  pintarRondas();
-  actualizarRanking();
-  $("ranking").style.display = "block";
-  guardar();
+function pintarJugadores(){
+  const ul=$("listaJugadores"); ul.innerHTML="";
+  jugadores.forEach(j=>{
+    const li=document.createElement("li"); li.textContent=j; ul.appendChild(li);
+  });
 }
 
-/* --- con 4 jugadores produce los 3 partidos únicos --- */
-function generarTodosLosPartidos(p) {
-  // p[0] se empareja con cada uno -> forma todas las parejas
+/* ---------- Calendario ---------- */
+$("genRndBtn").onclick=generarRondas;
+function generarRondas(){
+  const nR=+$("numRondas").value; if(nR<1)return alert("Rondas?");
+  if(jugadores.length!==4)return alert("Solo 4 jugadores en esta demo");
+  rondas=[]; for(let r=0;r<nR;r++){rondas.push(genPartidos(jugadores));}
+  resultados={}; pintarRondas(); actualizarRanking(); $("ranking").style.display="block"; save(); initLucide();
+}
+function genPartidos(p){ // 3 partidos únicos con 4 jugadores
   return [
-    [p[0], p[1], p[2], p[3]], // P0&P1 vs P2&P3
-    [p[0], p[2], p[1], p[3]], // P0&P2 vs P1&P3
-    [p[0], p[3], p[1], p[2]]  // P0&P3 vs P1&P2
+    [p[0],p[1],p[2],p[3]],
+    [p[0],p[2],p[1],p[3]],
+    [p[0],p[3],p[1],p[2]]
   ];
 }
 
-/* ---------- Pintar calendario ---------- */
-function pintarRondas() {
-  const cont = $("rondasContainer");
-  cont.innerHTML = "";
-
-  rondas.forEach((matches, idxR) => {
-    cont.innerHTML += `<h3>Ronda ${idxR + 1}</h3><ul id="ulR${idxR}"></ul>`;
-    const ul = $(`ulR${idxR}`);
-
-    matches.forEach((m, idxM) => {
-      const key  = encodeKey(m);
-      const gAId = `gA_${idxR}_${idxM}`;
-      const gBId = `gB_${idxR}_${idxM}`;
-      const gA   = resultados[key]?.gA ?? "";
-      const gB   = resultados[key]?.gB ?? "";
-
-      ul.innerHTML += `
-<li>
-  ${m[0]} & ${m[1]} vs ${m[2]} & ${m[3]}
-  <input  type="number" id="${gAId}" min="0" placeholder="Games ${m[0]}-${m[1]}"
-          value="${gA}" onchange="registrar('${key}')">
-  <input  type="number" id="${gBId}" min="0" placeholder="Games ${m[2]}-${m[3]}"
-          value="${gB}" onchange="registrar('${key}')">
-</li>`;
+/* ---------- Pintar rondas ---------- */
+function pintarRondas(){
+  const cont=$("rondasContainer"); cont.innerHTML="";
+  rondas.forEach((matches,r)=>{
+    const ul=document.createElement("ul"); ul.id=`ulR${r}`; cont.appendChild(document.createElement("h3")).textContent=`${t("ranking")} R${r+1}`;
+    cont.appendChild(ul);
+    matches.forEach((m,i)=>{
+      const key=encodeKey(m); const li=document.createElement("li"); ul.appendChild(li);
+      li.innerHTML=`
+        ${m[0]} & ${m[1]} vs ${m[2]} & ${m[3]}
+        <input type="number" min="0" placeholder="Games ${m[0]}-${m[1]}" value="${resultados[key]?.gA||""}">
+        <input type="number" min="0" placeholder="Games ${m[2]}-${m[3]}" value="${resultados[key]?.gB||""}">
+      `;
+      li.querySelectorAll("input").forEach(inp=>inp.onchange=()=>registrar(key,li));
     });
   });
 }
 
 /* ---------- Registrar resultado ---------- */
-function registrar(key) {
-  const inputs = document.querySelectorAll(`input[onchange*="${key}"]`);
-  const gA = parseInt(inputs[0].value);
-  const gB = parseInt(inputs[1].value);
-  if (Number.isNaN(gA) || Number.isNaN(gB)) return;
-
-  resultados[key] = { gA, gB };
-  actualizarRanking();
-  guardar();
+function registrar(key,li){
+  const inp=li.querySelectorAll("input");
+  const gA=parseInt(inp[0].value), gB=parseInt(inp[1].value);
+  if(Number.isNaN(gA)||Number.isNaN(gB))return;
+  resultados[key]={gA,gB}; actualizarRanking(); save();
 }
 
-/* ---------- Ranking individual ---------- */
-function actualizarRanking() {
-  const stat = {};
-  jugadores.forEach(j => stat[j] = { vict: 0, games: 0 });
-
-  Object.entries(resultados).forEach(([key, { gA, gB }]) => {
-    const [a1, a2, b1, b2] = decodeKey(key);
-    if (gA > gB) { stat[a1].vict++; stat[a2].vict++; }
-    else if (gB > gA) { stat[b1].vict++; stat[b2].vict++; }
-
-    stat[a1].games += gA; stat[a2].games += gA;
-    stat[b1].games += gB; stat[b2].games += gB;
+/* ---------- Ranking ---------- */
+function actualizarRanking(){
+  const stats={}; jugadores.forEach(j=>stats[j]={vict:0,games:0});
+  Object.entries(resultados).forEach(([k,{gA,gB}])=>{
+    const [a1,a2,b1,b2]=decodeKey(k);
+    if(gA>gB){stats[a1].vict++;stats[a2].vict++;}else if(gB>gA){stats[b1].vict++;stats[b2].vict++;}
+    stats[a1].games+=gA; stats[a2].games+=gA; stats[b1].games+=gB; stats[b2].games+=gB;
   });
-
-  const orden = Object.entries(stat).sort((a, b) => {
-    if (b[1].vict !== a[1].vict) return b[1].vict - a[1].vict;
-    return b[1].games - a[1].games;
-  });
-
-  let html = "<tr><th>Pos</th><th>Jugador</th><th>Victorias</th><th>Games</th></tr>";
-  orden.forEach(([j, s], i) => {
-    html += `<tr><td>${i + 1}</td><td>${j}</td><td>${s.vict}</td><td>${s.games}</td></tr>`;
-  });
-  $("tablaRanking").innerHTML = html;
+  const ord=Object.entries(stats).sort((a,b)=>b[1].vict-a[1].vict||b[1].games-a[1].games);
+  let html=`<tr><th>#</th><th>${t("playerReg")}</th><th>V</th><th>G</th></tr>`;
+  ord.forEach(([j,s],i)=>html+=`<tr><td>${i+1}</td><td>${j}</td><td>${s.vict}</td><td>${s.games}</td></tr>`);
+  $("tablaRanking").innerHTML=html;
 }
 
 /* ---------- Inicializar ---------- */
-window.onload = () => {
-  cargar();
-  if (eventoNombre) {
-    $("nombreEventoActual").textContent = `Evento: ${eventoNombre}`;
-    $("crear-evento").style.display  = "none";
-    $("registro-jugadores").style.display = "block";
-    pintarJugadores();
-    if (rondas.length) {
-      pintarRondas();
-      actualizarRanking();
-      $("ranking").style.display = "block";
-    }
-  }
+window.onload=()=>{
+  load(); applyTranslations();
+  $("nombreEventoActual").textContent=eventoNombre?`${t("createEvent")}: ${eventoNombre}`:"";
+  if(eventoNombre){$("crear-evento").style.display="none";$("registro-jugadores").style.display="block";}
+  pintarJugadores(); if(rondas.length){pintarRondas();actualizarRanking();$("ranking").style.display="block";}
+  initLucide();
 };
