@@ -1,71 +1,65 @@
-body {
-  font-family: sans-serif;
-  padding: 20px;
-  margin: 0;
-  background-color: #f5f5f5;
-  color: #2c3e50;
+/*  -- Diseño responsivo sencillo --  */
+body{
+  font-family:sans-serif;
+  padding:20px;
+  margin:0;
+  background:#f5f5f5;
+  color:#2c3e50;
 }
 
-h1, h2 {
-  text-align: center;
+h1,h2{ text-align:center; }
+
+section{
+  background:#fff;
+  padding:20px;
+  margin:15px auto;
+  border-radius:10px;
+  box-shadow:0 2px 5px rgba(0,0,0,.1);
+  max-width:500px;
 }
 
-section {
-  background: white;
-  padding: 20px;
-  margin: 15px auto;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  max-width: 500px;
+input,button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  font-size:1rem;
+  box-sizing:border-box;
+  border-radius:5px;
 }
 
-input, button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  margin-bottom: 15px;
-  font-size: 1rem;
-  box-sizing: border-box;
-  border-radius: 5px;
+button{
+  background:#2ecc71;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  transition:.3s;
+}
+button:hover{ background:#27ae60; }
+
+ul{ list-style:none; padding-left:0; }
+li{
+  background:#ecf0f1;
+  padding:8px;
+  margin-bottom:6px;
+  border-radius:5px;
+  text-align:center;
 }
 
-button {
-  background-color: #2ecc71;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
+table{
+  width:100%;
+  border-collapse:collapse;
 }
-
-button:hover {
-  background-color: #27ae60;
+th,td{
+  padding:8px;
+  border:1px solid #ddd;
+  text-align:center;
+  font-size:.95rem;
+  background:#fff;
 }
+th{ background:#2ecc71; color:#fff; }
 
-ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-li {
-  padding: 8px;
-  background: #ecf0f1;
-  margin-bottom: 6px;
-  border-radius: 5px;
-  text-align: center;
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 10px;
-  }
-
-  section {
-    margin: 10px;
-    padding: 15px;
-  }
-
-  input, button {
-    font-size: 0.95rem;
-    padding: 10px;
-  }
+@media(max-width:600px){
+  body{ padding:10px; }
+  section{ margin:10px; padding:15px; }
+  input,button{ font-size:.95rem; padding:10px; }
 }
