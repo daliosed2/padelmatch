@@ -138,3 +138,5 @@ function cargarDesdeLocalStorage() {
 // Cargar datos al abrir la página
 // =============================
 window.onload = cargarDesdeLocalStorage;
+document.getElementById("nombreEventoActual").textContent = `Evento: ${eventoNombre}`;
+
