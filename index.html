@@ -3,55 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PadelMatch</title>
+  <title>PadelMatch Pro</title>
 
-  <!-- Estilos -->
   <link rel="stylesheet" href="style.css" />
 
-  <!--  Lucide (íconos SVG ligeros)  -->
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
-  <h1 id="titleMain">🎾 PadelMatch</h1>
-  <h3 id="nombreEventoActual" class="center"></h3>
 
-  <!-- Botonera principal - AHORA centrada -->
-  <div class="top-actions">
-    <button id="btnNueva" class="btn icon"><i data-lucide="external-link"></i><span data-t="newTab">Nueva pestaña</span></button>
-    <button id="btnReset" class="btn icon"><i data-lucide="rotate-ccw"></i><span data-t="reset">Reset / Nuevo evento</span></button>
-    <button id="langBtn" class="btn icon"><i data-lucide="languages"></i><span id="langTxt">EN</span></button>
-  </div>
+  <header class="header">
+    <h1 id="titleMain" class="header__title">🎾 PadelMatch</h1>
+    <h3 id="nombreEventoActual" class="header__subtitle"></h3>
+  </header>
 
-  <!-- Crear evento -->
-  <section id="crear-evento">
-    <h2 data-t="createEvent">Crear Partida/Torneo</h2>
-    <input id="nombreEvento" placeholder="Nombre del evento" />
-    <button id="crearBtn" class="btn icon"><i data-lucide="plus-circle"></i><span data-t="create">Crear</span></button>
-  </section>
+  <nav class="top-actions">
+    <button id="btnNueva" class="btn btn--icon"><i data-lucide="external-link"></i> <span data-t="newTab">Nueva pestaña</span></button>
+    <button id="btnReset" class="btn btn--icon"><i data-lucide="rotate-ccw"></i> <span data-t="reset">Reset / Nuevo evento</span></button>
+    <button id="langBtn" class="btn btn--icon"><i data-lucide="languages"></i> <span id="langTxt">EN</span></button>
+  </nav>
 
-  <!-- Registro jugadores -->
-  <section id="registro-jugadores" style="display:none;">
-    <h2 data-t="playerReg">Registro de jugadores</h2>
-    <div class="flex">
-      <input id="nombreJugador" placeholder="Nombre del jugador" />
-      <button id="addPlayerBtn" class="btn icon"><i data-lucide="user-plus"></i></button>
+  <main>
+    <section id="crear-evento" class="card">
+      <h2 class="card__title" data-t="createEvent">Crear Partida/Torneo</h2>
+      <div class="form-group">
+        <label for="nombreEvento" class="visually-hidden">Nombre del Evento</label>
+        <input id="nombreEvento" class="form-group__input" placeholder="Nombre del evento" />
+        <button id="crearBtn" class="btn btn--primary btn--icon"><i data-lucide="plus-circle"></i> <span data-t="create">Crear</span></button>
+      </div>
+    </section>
+
+    <div id="app-view" class="hidden">
+      <section id="registro-jugadores" class="card">
+        <h2 class="card__title" data-t="playerReg">Registro de jugadores</h2>
+        <div class="form-group">
+          <label for="nombreJugador" class="visually-hidden">Nombre del Jugador</label>
+          <input id="nombreJugador" class="form-group__input" placeholder="Nombre del jugador" />
+          <button id="addPlayerBtn" class="btn btn--icon"><i data-lucide="user-plus"></i></button>
+        </div>
+        <ul id="listaJugadores" class="player-list"></ul>
+
+        <h2 class="card__title" data-t="genCalendar">Generar calendario</h2>
+        <div class="form-group">
+          <label for="numRondas" class="visually-hidden">Número de Rondas</label>
+          <input type="number" id="numRondas" min="1" class="form-group__input form-group__input--small" placeholder="Nº de rondas" />
+          <button id="genRndBtn" class="btn btn--icon"><i data-lucide="play-circle"></i></button>
+        </div>
+      </section>
+
+      <section id="rondasContainer" class="card"></section>
+
+      <section id="ranking" class="card">
+        <h2 class="card__title" data-t="ranking">Ranking</h2>
+        <table id="tablaRanking" class="ranking-table"></table>
+      </section>
     </div>
-    <ul id="listaJugadores" class="list"></ul>
-
-    <h2 data-t="genCalendar">Generar calendario</h2>
-    <div class="flex">
-      <input type="number" id="numRondas" min="1" placeholder="Nº de rondas" />
-      <button id="genRndBtn" class="btn icon"><i data-lucide="play-circle"></i></button>
-    </div>
-  </section>
-
-  <!-- Calendario y ranking -->
-  <section id="rondasContainer"></section>
-
-  <section id="ranking" style="display:none;">
-    <h2 data-t="ranking">Ranking</h2>
-    <table id="tablaRanking"></table>
-  </section>
+  </main>
 
   <script src="script.js"></script>
 </body>
