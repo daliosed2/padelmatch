@@ -187,4 +187,78 @@ const PadelMatchApp = {
           stats[b1].vict++; stats[b2].vict++;
         }
         stats[a1].games += gA; stats[a2].games += gA;
-        stats
+        stats[b1].games += gB; stats[b2].games += gB;
+      }
+    });
+    const order = Object.entries(stats).sort((a, b) => b[1].vict - a[1].vict || b[1].games - a[1].games);
+    let html = `<thead><tr><th>#</th><th>${this.t("playerReg")}</th><th>V</th><th>G</th></tr></thead><tbody>`;
+    order.forEach(([j, s], i) => {
+      html += `<tr><td>${i + 1}</td><td>${j}</td><td>${s.vict}</td><td>${s.games}</td></tr>`;
+    });
+    html += `</tbody>`;
+    this.elements.tablaRanking.innerHTML = html;
+  },
+
+  applyTranslations() {
+    document.querySelectorAll("[data-t]").forEach(el => {
+      const textKey = el.dataset.t;
+      if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3) {
+        el.textContent = this.t(textKey);
+      } else {
+        const textNode = Array.from(el.childNodes).find(node => node.nodeType === 3);
+        if (textNode) {
+          textNode.textContent = ` ${this.t(textKey)} `;
+        }
+      }
+    });
+    this.elements.langTxt.textContent = this.state.lang === "es" ? "EN" : "ES";
+  },
+
+  saveState() {
+    sessionStorage.setItem("padelmatch_pro", JSON.stringify(this.state));
+  },
+  loadState() {
+    const savedData = sessionStorage.getItem("padelmatch_pro");
+    if (savedData) this.state = JSON.parse(savedData);
+  },
+  saveAndRender() {
+    this.saveState();
+    this.render();
+  },
+  t(key) { return this.i18n[this.state.lang]?.[key] || key; },
+  encodeKey: (m) => `${m[0]}&${m[1]}|${m[2]}&${m[3]}`,
+  decodeKey: (k) => {
+    const [tA, tB] = k.split("|");
+    return [...tA.split("&"), ...tB.split("&")];
+  },
+  
+  formatName: (s) => s ? s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase() : "",
+  
+  // *** LA COMA FALTANTE ESTABA AQUÍ (después de la línea de formatName) ***
+  
+  buildRounds(players, courts = 1) {
+    const pls = [...players];
+    const need = (4 - (pls.length % 4)) % 4;
+    for (let i = 0; i < need; i++) pls.push("BYE");
+    const n = pls.length;
+    const baseRounds = [];
+    let arr = [...pls];
+    const circleRounds = n - 1;
+    for (let r = 0; r < circleRounds; r++) {
+      const groups = [];
+      for (let g = 0; g < n; g += 4) groups.push(arr.slice(g, g + 4));
+      baseRounds.push(groups);
+      arr = [arr[0], ...arr.slice(2), arr[1]];
+    }
+    const finalRounds = [];
+    baseRounds.forEach(round => {
+      for (let i = 0; i < round.length; i += courts) {
+        finalRounds.push(round.slice(i, i + courts));
+      }
+    });
+    const groupToMatches = (g) => g.includes("BYE") ? [] : [[g[0], g[1], g[2], g[3]], [g[0], g[2], g[1], g[3]], [g[0], g[3], g[1], g[2]]];
+    return finalRounds.map(round => round.flatMap(groupToMatches));
+  },
+};
+
+document.addEventListener('DOMContentLoaded', () => PadelMatchApp.init());
