@@ -1,11 +1,12 @@
 /*****************************************************************
- * PadelMatch Pro – v2.0
+ * PadelMatch Pro – v2.1 (Corregido)
  * -------------------------------------------------------------
  * Refactorizado para ser más modular, escalable y mantenible.
  * - Lógica encapsulada en el objeto PadelMatchApp.
  * - Estado centralizado.
  * - Renderizado declarativo.
  * - Delegación de eventos.
+ * - Corrección en el registro de marcadores.
  *****************************************************************/
 
 const PadelMatchApp = {
@@ -20,10 +21,10 @@ const PadelMatchApp = {
 
   // --- Traducciones ---
   i18n: {
-    es: { /* ... traducciones en español ... */ },
-    en: { /* ... traducciones en inglés ... */ }
+    es: { newTab: "Nueva pestaña", reset: "Reset / Nuevo evento", createEvent: "Crear partida / Torneo", create: "Crear", playerReg: "Registro de jugadores", genCalendar: "Generar calendario", ranking: "Ranking", howManyCourts: "¿Cuántas canchas tienes disponibles?", needPlayers: "Se necesitan al menos 4 jugadores", sliceRounds: "Rondas solicitadas exceden las posibles; se repetirán." },
+    en: { newTab: "New tab", reset: "Reset / New event", createEvent: "Create Match / Tournament (Doubles)", create: "Create", playerReg: "Player registration", genCalendar: "Generate schedule", ranking: "Leaderboard", howManyCourts: "How many courts are available?", needPlayers: "At least 4 players required", sliceRounds: "Requested rounds exceed possible; pattern will repeat." }
   },
-  
+
   // --- Selectores del DOM cacheados ---
   elements: {},
 
@@ -31,30 +32,19 @@ const PadelMatchApp = {
   // MÉTODO PRINCIPAL DE INICIALIZACIÓN
   // =================================================================
   init() {
-    this.i18n.es = { newTab: "Nueva pestaña", reset: "Reset / Nuevo evento", createEvent: "Crear partida / Torneo", create: "Crear", playerReg: "Registro de jugadores", genCalendar: "Generar calendario", ranking: "Ranking", howManyCourts: "¿Cuántas canchas tienes disponibles?", needPlayers: "Se necesitan al menos 4 jugadores", sliceRounds: "Rondas solicitadas exceden las posibles; se repetirán."};
-    this.i18n.en = { newTab: "New tab", reset: "Reset / New event", createEvent: "Create Match / Tournament (Doubles)", create: "Create", playerReg: "Player registration", genCalendar: "Generate schedule", ranking: "Leaderboard", howManyCourts: "How many courts are available?", needPlayers: "At least 4 players required", sliceRounds: "Requested rounds exceed possible; pattern will repeat."};
-
-    // Asignar elementos del DOM a nuestro objeto de elementos
     this.elements = {
-      // Vistas
       crearEventoView: document.getElementById('crear-evento'),
       appView: document.getElementById('app-view'),
       rankingView: document.getElementById('ranking'),
-      
-      // Contenedores y listas
       rondasContainer: document.getElementById('rondasContainer'),
       listaJugadores: document.getElementById('listaJugadores'),
       tablaRanking: document.getElementById('tablaRanking'),
-      
-      // Inputs y botones
       nombreEvento: document.getElementById('nombreEvento'),
       crearBtn: document.getElementById('crearBtn'),
       nombreJugador: document.getElementById('nombreJugador'),
       addPlayerBtn: document.getElementById('addPlayerBtn'),
       numRondas: document.getElementById('numRondas'),
       genRndBtn: document.getElementById('genRndBtn'),
-      
-      // UI General
       nombreEventoActual: document.getElementById('nombreEventoActual'),
       langTxt: document.getElementById('langTxt'),
       btnNueva: document.getElementById('btnNueva'),
@@ -64,7 +54,7 @@ const PadelMatchApp = {
 
     this.loadState();
     this.addEventListeners();
-    this.render(); // Renderizado inicial
+    this.render();
   },
 
   // =================================================================
@@ -81,15 +71,13 @@ const PadelMatchApp = {
         this.addPlayer();
       }
     });
-    
-    // Delegación de eventos para los resultados de los partidos
+
     this.elements.rondasContainer.addEventListener('change', (e) => {
       if (e.target.classList.contains('score-input')) {
         this.recordResult(e.target);
       }
     });
 
-    // Botones globales
     this.elements.btnNueva.onclick = () => window.open(location.href, "_blank");
     this.elements.btnReset.onclick = () => {
       if (confirm(this.t("reset") + "?")) {
@@ -133,7 +121,7 @@ const PadelMatchApp = {
       return;
     }
     const courts = parseInt(prompt(this.t("howManyCourts") + " (≥1)"), 10) || 1;
-    
+
     const roundsAll = this.buildRounds(this.state.jugadores, courts);
 
     this.state.rondas = [];
@@ -142,31 +130,27 @@ const PadelMatchApp = {
       if (i >= roundsAll.length) console.warn(this.t("sliceRounds"));
     }
 
-    this.state.resultados = {}; // Resetear resultados al generar nuevo calendario
+    this.state.resultados = {};
     this.saveAndRender();
   },
-  
- recordResult(inputElement) {
+
+  recordResult(inputElement) {
     const li = inputElement.closest('.match-list__item');
     const key = li.dataset.key;
     const inputs = li.querySelectorAll('.score-input');
     const gA_val = inputs[0].value;
     const gB_val = inputs[1].value;
 
-    // Convierte a número, o lo deja como string vacío si no es un número válido
     const gA = !isNaN(parseInt(gA_val, 10)) ? parseInt(gA_val, 10) : "";
     const gB = !isNaN(parseInt(gB_val, 10)) ? parseInt(gB_val, 10) : "";
 
-    // Si ambos campos están vacíos, eliminamos el registro del partido
     if (gA === "" && gB === "") {
       delete this.state.resultados[key];
     } else {
       this.state.resultados[key] = { gA, gB };
     }
 
-    // *** LA CLAVE DEL ARREGLO ESTÁ AQUÍ ***
-    // Ya no llamamos a render() completo, solo guardamos el estado y actualizamos el ranking.
-    // Esto evita que los campos de texto se borren.
+    // Corrección: Solo guardamos estado y actualizamos ranking, sin re-renderizar todo.
     this.saveState();
     this.updateRanking();
   },
@@ -177,27 +161,24 @@ const PadelMatchApp = {
   render() {
     this.applyTranslations();
 
-    // Visibilidad de las secciones principales
     const hasEvent = !!this.state.eventoNombre;
     this.elements.crearEventoView.classList.toggle('hidden', hasEvent);
     this.elements.appView.classList.toggle('hidden', !hasEvent);
 
-    if(hasEvent) {
+    if (hasEvent) {
       this.elements.nombreEventoActual.textContent = this.state.eventoNombre;
       this.renderPlayers();
-      
+
       const hasRounds = this.state.rondas.length > 0;
       this.elements.rankingView.classList.toggle('hidden', !hasRounds);
-      
+      this.elements.rondasContainer.classList.toggle('hidden', !hasRounds);
+
       if (hasRounds) {
         this.renderRounds();
         this.updateRanking();
-      } else {
-        this.elements.rondasContainer.innerHTML = ''; // Limpiar si no hay rondas
       }
     }
-    
-    // Asegurarse de que los iconos se rendericen después de los cambios en el DOM
+
     if (window.lucide) {
       lucide.createIcons();
     }
@@ -235,8 +216,7 @@ const PadelMatchApp = {
     this.state.jugadores.forEach((j) => (stats[j] = { vict: 0, games: 0 }));
 
     Object.entries(this.state.resultados).forEach(([k, { gA, gB }]) => {
-      // *** MEJORA DE ROBUSTEZ AÑADIDA AQUÍ ***
-      // Solo calcula el resultado si AMBOS marcadores son números.
+      // Corrección: Solo computar si ambos marcadores son números.
       if (typeof gA === 'number' && typeof gB === 'number') {
         const [a1, a2, b1, b2] = this.decodeKey(k);
         if (gA > gB) {
@@ -260,28 +240,25 @@ const PadelMatchApp = {
     let html = `<thead><tr><th>#</th><th>${this.t("playerReg")}</th><th>V</th><th>G</th></tr></thead><tbody>`;
     order.forEach(
       ([j, s], i) =>
-        (html += `<tr><td>${i + 1}</td><td>${j}</td><td>${s.vict}</td><td>${s.games}</td></tr>`)
+      (html += `<tr><td>${i + 1}</td><td>${j}</td><td>${s.vict}</td><td>${s.games}</td></tr>`)
     );
     html += `</tbody>`;
     this.elements.tablaRanking.innerHTML = html;
   },
 
-    const order = Object.entries(stats).sort(
-      (a, b) => b[1].vict - a[1].vict || b[1].games - a[1].games
-    );
-
-    let html = `<thead><tr><th>#</th><th>${this.t("playerReg")}</th><th>V</th><th>G</th></tr></thead><tbody>`;
-    order.forEach(
-      ([j, s], i) =>
-        (html += `<tr><td>${i + 1}</td><td>${j}</td><td>${s.vict}</td><td>${s.games}</td></tr>`)
-    );
-    html += `</tbody>`;
-    this.elements.tablaRanking.innerHTML = html;
-  },
-  
   applyTranslations() {
     document.querySelectorAll("[data-t]").forEach((el) => {
-      el.textContent = this.t(el.dataset.t);
+      const key = el.dataset.t;
+      // Solo actualiza si el elemento no tiene hijos de tipo elemento (para no sobreescribir los íconos)
+      if (el.children.length === 0) {
+        el.textContent = this.t(key);
+      } else {
+        // Si tiene hijos (como el ícono), busca el nodo de texto para actualizar
+        const textNode = Array.from(el.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0);
+        if (textNode) {
+          textNode.textContent = ` ${this.t(key)} `;
+        }
+      }
     });
     this.elements.langTxt.textContent = this.state.lang === "es" ? "EN" : "ES";
   },
@@ -305,7 +282,7 @@ const PadelMatchApp = {
     this.render();
   },
 
-  t: (key) => PadelMatchApp.i18n[PadelMatchApp.state.lang][key] || key,
+  t(key) { return this.i18n[this.state.lang][key] || key },
   encodeKey: ([a1, a2, b1, b2]) => `${a1}&${a2}|${b1}&${b2}`,
   decodeKey: (key) => {
     const [tA, tB] = key.split("|");
@@ -313,7 +290,6 @@ const PadelMatchApp = {
   },
   formatName: (s) => s ? s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase() : s,
 
-  // Algoritmo de generación de rondas (sin cambios en su lógica interna)
   buildRounds(players, courts = 1) {
     const pls = [...players];
     const need = (4 - (pls.length % 4)) % 4;
@@ -343,5 +319,4 @@ const PadelMatchApp = {
   },
 };
 
-// --- Iniciar la aplicación cuando el DOM esté listo ---
 document.addEventListener('DOMContentLoaded', () => PadelMatchApp.init());
