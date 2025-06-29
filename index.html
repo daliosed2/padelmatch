@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PadelMatch</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="Style.css">
 </head>
 <body>
   <h1>🎾 PadelMatch</h1>
@@ -11,16 +12,16 @@
   <section id="crear-evento">
     <h2>Crear Partida o Torneo</h2>
     <input type="text" id="nombreEvento" placeholder="Nombre del evento">
-    <button onclick="crearEvento()">Crear</button>
+    <button id="btnCrearEvento">Crear</button>
   </section>
 
   <section id="registro-jugadores" style="display: none;">
     <h2>Registro de jugadores</h2>
     <input type="text" id="nombreJugador" placeholder="Nombre del jugador">
-    <button onclick="agregarJugador()">Agregar</button>
+    <button id="btnAgregarJugador">Agregar</button>
     <ul id="listaJugadores"></ul>
   </section>
 
-  <script src="script.js"></script>
+  <script src="scripts.js"></script>
 </body>
 </html>
