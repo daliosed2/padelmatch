@@ -1,65 +1,91 @@
-/*  -- Diseño responsivo sencillo --  */
+/* ---------- Variables de color ---------- */
+:root{
+  --bg:#f5f5f5;
+  --card:#ffffff;
+  --txt:#2c3e50;
+  --accent:#2ecc71;
+  --accent-dark:#27ae60;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1a1a;
+    --card:#282828;
+    --txt:#f0f0f0;
+    --accent:#2ecc71;
+    --accent-dark:#1f9d55;
+  }
+}
+
+/* ---------- Base ---------- */
 body{
   font-family:sans-serif;
   padding:20px;
   margin:0;
-  background:#f5f5f5;
-  color:#2c3e50;
+  background:var(--bg);
+  color:var(--txt);
+  transition:background .3s,color .3s;
 }
-
-h1,h2{ text-align:center; }
-
+h1,h2,h3{ text-align:center; }
+.center{ text-align:center; }
+.space-y{ margin-bottom:15px; }
 section{
-  background:#fff;
+  background:var(--card);
   padding:20px;
   margin:15px auto;
-  border-radius:10px;
-  box-shadow:0 2px 5px rgba(0,0,0,.1);
-  max-width:500px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
+  max-width:550px;
+  transition:background .3s;
 }
-
 input,button{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
   font-size:1rem;
-  box-sizing:border-box;
-  border-radius:5px;
-}
-
-button{
-  background:#2ecc71;
-  color:#fff;
+  border-radius:6px;
   border:none;
+}
+input{
+  flex:1;
+  padding:10px;
+  margin:5px 0;
+  box-sizing:border-box;
+}
+.btn{
+  background:var(--accent);
+  color:#fff;
+  padding:10px 14px;
+  margin:5px;
   cursor:pointer;
-  transition:.3s;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  transition:background .25s,transform .25s;
 }
-button:hover{ background:#27ae60; }
+.btn:hover{ background:var(--accent-dark); transform:translateY(-1px); }
+.btn.icon svg{ width:18px;height:18px; stroke-width:2; }
 
-ul{ list-style:none; padding-left:0; }
-li{
-  background:#ecf0f1;
+.flex{ display:flex; gap:6px; }
+.list{ list-style:none; padding:0; }
+.list li{
+  background:var(--card);
+  border:1px solid var(--accent);
+  border-radius:6px;
   padding:8px;
-  margin-bottom:6px;
-  border-radius:5px;
-  text-align:center;
+  margin-top:6px;
+  animation:fadin .4s ease;
 }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-}
+/* ---------- Tabla ---------- */
+table{ width:100%; border-collapse:collapse; }
 th,td{
   padding:8px;
-  border:1px solid #ddd;
   text-align:center;
+  border:1px solid var(--accent-dark);
   font-size:.95rem;
-  background:#fff;
+  transition:background .3s;
 }
-th{ background:#2ecc71; color:#fff; }
+th{ background:var(--accent); color:#fff; }
 
-@media(max-width:600px){
-  body{ padding:10px; }
-  section{ margin:10px; padding:15px; }
-  input,button{ font-size:.95rem; padding:10px; }
+/* ---------- Animación ---------- */
+@keyframes fadin{
+  from{ opacity:0; transform:scale(.9); }
+  to{ opacity:1; transform:scale(1); }
 }
