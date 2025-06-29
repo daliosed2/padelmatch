@@ -4,42 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PadelMatch</title>
+
+  <!-- Estilos -->
   <link rel="stylesheet" href="style.css" />
+
+  <!--  Lucide (íconos SVG ligeros)  -->
+  <script defer src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
-  <h1>🎾 PadelMatch</h1>
-  <h3 id="nombreEventoActual" style="text-align:center;"></h3>
+  <h1 id="titleMain">🎾 PadelMatch</h1>
+  <h3 id="nombreEventoActual" class="center"></h3>
 
-  <!-- Botones globales -->
-  <div style="text-align:center; margin-bottom:15px;">
-    <button onclick="abrirNuevaPestana()">➕ Nueva pestaña</button>
-    <button onclick="resetEvento()">🔄 Reset / Nuevo evento</button>
+  <!-- Botonera principal -->
+  <div class="center space-y">
+    <button id="btnNueva"   class="btn icon"><i data-lucide="external-link"></i><span data-t="newTab">Nueva pestaña</span></button>
+    <button id="btnReset"   class="btn icon"><i data-lucide="rotate-ccw"></i><span data-t="reset">Reset / Nuevo evento</span></button>
+    <button id="langBtn"    class="btn icon"><i data-lucide="languages"></i><span id="langTxt">EN</span></button>
   </div>
 
   <!-- Crear evento -->
   <section id="crear-evento">
-    <h2>Crear Parranda / Torneo (Dobles)</h2>
+    <h2 data-t="createEvent">Crear Parranda / Torneo (Dobles)</h2>
     <input id="nombreEvento" placeholder="Nombre del evento" />
-    <button onclick="crearEvento()">Crear</button>
+    <button id="crearBtn" class="btn icon"><i data-lucide="plus-circle"></i><span data-t="create">Crear</span></button>
   </section>
 
-  <!-- Registro de jugadores -->
+  <!-- Registro jugadores -->
   <section id="registro-jugadores" style="display:none;">
-    <h2>Registro de jugadores</h2>
-    <input id="nombreJugador" placeholder="Nombre del jugador" />
-    <button onclick="agregarJugador()">Agregar</button>
-    <ul id="listaJugadores"></ul>
+    <h2 data-t="playerReg">Registro de jugadores</h2>
+    <div class="flex">
+      <input id="nombreJugador" placeholder="Nombre del jugador" />
+      <button id="addPlayerBtn" class="btn icon"><i data-lucide="user-plus"></i></button>
+    </div>
+    <ul id="listaJugadores" class="list"></ul>
 
-    <h2>Generar calendario</h2>
-    <input type="number" id="numRondas" min="1" placeholder="Nº de rondas" />
-    <button onclick="generarRondas()">Generar rondas</button>
+    <h2 data-t="genCalendar">Generar calendario</h2>
+    <div class="flex">
+      <input type="number" id="numRondas" min="1" placeholder="Nº de rondas" />
+      <button id="genRndBtn" class="btn icon"><i data-lucide="play-circle"></i></button>
+    </div>
   </section>
 
   <!-- Calendario y ranking -->
   <section id="rondasContainer"></section>
 
   <section id="ranking" style="display:none;">
-    <h2>Ranking</h2>
+    <h2 data-t="ranking">Ranking</h2>
     <table id="tablaRanking"></table>
   </section>
 
