@@ -14,6 +14,7 @@ function crearEvento() {
   eventoNombre = nombre;
   document.getElementById("crear-evento").style.display = "none";
   document.getElementById("registro-jugadores").style.display = "block";
+  document.getElementById("nombreEventoActual").textContent = `Evento: ${eventoNombre}`;
   guardarEnLocalStorage();
 }
 
@@ -129,6 +130,7 @@ function cargarDesdeLocalStorage() {
     document.getElementById("crear-evento").style.display = "none";
     document.getElementById("registro-jugadores").style.display = "block";
 
+    document.getElementById("nombreEventoActual").textContent = `Evento: ${eventoNombre}`;
     mostrarJugadores();
     mostrarPartidos(partidos);
   }
@@ -138,5 +140,3 @@ function cargarDesdeLocalStorage() {
 // Cargar datos al abrir la página
 // =============================
 window.onload = cargarDesdeLocalStorage;
-document.getElementById("nombreEventoActual").textContent = `Evento: ${eventoNombre}`;
-
