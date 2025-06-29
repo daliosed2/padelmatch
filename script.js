@@ -1,22 +1,26 @@
 /*****************************************************************
- *  PadelMatch – versión DOBLES (2 vs 2) con Reset y pestañas
+ *  PadelMatch – dobles 2 vs 2
+ *  - Ronda única con TODAS las combinaciones de parejas (n = 4 → 3 partidos)
+ *  - Puntaje por partido y ranking individual
+ *  - Reset y pestañas independientes (sessionStorage)
  *****************************************************************/
 
 /* ---------- Variables ---------- */
 let jugadores    = [];                 // lista de nombres
 let eventoNombre = "";
-let rondas       = [];                 // [ [ [a1,a2,b1,b2], ... ], ... ]
+let rondas       = [];                 // [ [ [a1,a2,b1,b2], ... ] ]  (una lista por ronda)
 let resultados   = {};                 // { key: {gA,gB} }
 
-/* ---------- Utilidades ---------- */
 const $ = id => document.getElementById(id);
+
+/* ---------- Helpers de clave ---------- */
 const encodeKey = ([a1,a2,b1,b2]) => `${a1}&${a2}|${b1}&${b2}`;
 const decodeKey = key => {
-  const [teamA, teamB] = key.split("|");
-  return [...teamA.split("&"), ...teamB.split("&")];
+  const [tA, tB] = key.split("|");
+  return [...tA.split("&"), ...tB.split("&")];
 };
 
-/* ---------- Persistencia por pestaña ---------- */
+/* ---------- Persistencia ---------- */
 function guardar() {
   sessionStorage.setItem("padelmatch",
     JSON.stringify({ eventoNombre, jugadores, rondas, resultados })
@@ -37,7 +41,7 @@ function resetEvento() {
   }
 }
 
-/* ---------- Creación de evento ---------- */
+/* ---------- Crear evento ---------- */
 function crearEvento() {
   const n = $("nombreEvento").value.trim();
   if (!n) return alert("Pon un nombre al evento");
@@ -63,26 +67,31 @@ function pintarJugadores() {
     .map((j, i) => `<li>${i + 1}. ${j}</li>`).join("");
 }
 
-/* ---------- Generar rondas DOBLES ---------- */
+/* ---------- Generar rondas con TODAS las combinaciones (n = 4) ---------- */
 function generarRondas() {
   const nR = +$("numRondas").value;
   if (nR < 1) return alert("Indica un nº de rondas (≥1)");
-  if (jugadores.length < 4) return alert("Mínimo 4 jugadores");
+  if (jugadores.length !== 4) return alert("Esta versión necesita exactamente 4 jugadores");
 
   rondas = [];
   for (let r = 0; r < nR; r++) {
-    const baraja = [...jugadores].sort(() => Math.random() - 0.5);
-    const matches = [];
-    for (let i = 0; i <= baraja.length - 4; i += 4) {
-      matches.push([baraja[i], baraja[i + 1], baraja[i + 2], baraja[i + 3]]);
-    }
-    rondas.push(matches);
+    rondas.push(generarTodosLosPartidos(jugadores));
   }
   resultados = {};
   pintarRondas();
   actualizarRanking();
   $("ranking").style.display = "block";
   guardar();
+}
+
+/* --- con 4 jugadores produce los 3 partidos únicos --- */
+function generarTodosLosPartidos(p) {
+  // p[0] se empareja con cada uno -> forma todas las parejas
+  return [
+    [p[0], p[1], p[2], p[3]], // P0&P1 vs P2&P3
+    [p[0], p[2], p[1], p[3]], // P0&P2 vs P1&P3
+    [p[0], p[3], p[1], p[2]]  // P0&P3 vs P1&P2
+  ];
 }
 
 /* ---------- Pintar calendario ---------- */
@@ -104,10 +113,10 @@ function pintarRondas() {
       ul.innerHTML += `
 <li>
   ${m[0]} & ${m[1]} vs ${m[2]} & ${m[3]}
-  <input type="number" id="${gAId}" min="0" placeholder="Games ${m[0]}-${m[1]}" value="${gA}"
-         onchange="registrar('${key}')">
-  <input type="number" id="${gBId}" min="0" placeholder="Games ${m[2]}-${m[3]}" value="${gB}"
-         onchange="registrar('${key}')">
+  <input  type="number" id="${gAId}" min="0" placeholder="Games ${m[0]}-${m[1]}"
+          value="${gA}" onchange="registrar('${key}')">
+  <input  type="number" id="${gBId}" min="0" placeholder="Games ${m[2]}-${m[3]}"
+          value="${gB}" onchange="registrar('${key}')">
 </li>`;
     });
   });
@@ -151,7 +160,7 @@ function actualizarRanking() {
   $("tablaRanking").innerHTML = html;
 }
 
-/* ---------- Inicialización ---------- */
+/* ---------- Inicializar ---------- */
 window.onload = () => {
   cargar();
   if (eventoNombre) {
