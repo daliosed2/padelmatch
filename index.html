@@ -1,29 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PadelMatch</title>
-  <link rel="stylesheet" href="Style.css">
+  <link rel="stylesheet" href="Style.css" />
 </head>
 <body>
+  <!-- Cabecera -->
   <h1>🎾 PadelMatch</h1>
   <h3 id="nombreEventoActual" style="text-align:center;"></h3>
 
+  <!-- Crear evento -->
   <section id="crear-evento">
-    <h2>Crear Parranda o Torneo</h2>
-    <input type="text" id="nombreEvento" placeholder="Nombre del evento">
+    <h2>Crear Parranda / Torneo</h2>
+    <input id="nombreEvento" placeholder="Nombre del evento" />
     <button onclick="crearEvento()">Crear</button>
   </section>
 
-  <section id="registro-jugadores" style="display: none;">
+  <!-- Registro de jugadores -->
+  <section id="registro-jugadores" style="display:none;">
     <h2>Registro de jugadores</h2>
-    <input type="text" id="nombreJugador" placeholder="Nombre del jugador">
+    <input id="nombreJugador" placeholder="Nombre del jugador" />
     <button onclick="agregarJugador()">Agregar</button>
     <ul id="listaJugadores"></ul>
 
-    <button onclick="generarPartidos()">Generar Partidos</button>
-    <ul id="listaPartidos"></ul>
+    <!-- Configuración de rondas -->
+    <h2>Generar calendario</h2>
+    <input type="number" id="numRondas" min="1" placeholder="Nº de rondas" />
+    <button onclick="generarRondas()">Generar rondas</button>
+  </section>
+
+  <!-- Aquí se pintan las rondas con inputs de games -->
+  <section id="rondasContainer"></section>
+
+  <!-- Ranking en vivo -->
+  <section id="ranking" style="display:none;">
+    <h2>Ranking</h2>
+    <table id="tablaRanking"></table>
   </section>
 
   <script src="scripts.js"></script>
