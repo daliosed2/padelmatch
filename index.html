@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PadelMatch Pro</title>
-
-  <link rel="stylesheet" href="style.css"/>
-
+  <link rel="stylesheet" href="style.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
@@ -32,6 +30,15 @@
       </div>
     </section>
 
+    <section id="seleccion-modalidad" class="card hidden">
+        <h2 class="card__title">Elige la Modalidad</h2>
+        <div class="modalidad-botones">
+            <button class="btn-modalidad" data-mode="liguilla">🏆<span class="btn-modalidad__text">Liguilla (Todos contra todos)</span></button>
+            <button class="btn-modalidad" data-mode="americano">🧑‍🤝‍🧑<span class="btn-modalidad__text">Torneo Americano (Compañeros rotan)</span></button>
+            <button class="btn-modalidad" data-mode="eliminatoria">⚔️<span class="btn-modalidad__text">Eliminatoria Directa</span></button>
+        </div>
+    </section>
+
     <div id="app-view" class="hidden">
       <section id="registro-jugadores" class="card">
         <h2 class="card__title" data-t="playerReg">Registro de jugadores</h2>
@@ -50,9 +57,9 @@
         </div>
       </section>
 
-      <section id="rondasContainer" class="card"></section>
+      <section id="rondasContainer" class="card hidden"></section>
 
-      <section id="ranking" class="card">
+      <section id="ranking" class="card hidden">
         <h2 class="card__title" data-t="ranking">Ranking</h2>
         <table id="tablaRanking" class="ranking-table"></table>
       </section>
